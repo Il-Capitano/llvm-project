@@ -723,7 +723,9 @@ ToolChain::path_list ToolChain::getRuntimePaths() const {
 ToolChain::path_list ToolChain::getStdlibPaths() const {
   path_list Paths;
   SmallString<128> P(D.Dir);
-  llvm::sys::path::append(P, "..", "lib", getTripleString());
+  llvm::sys::path::append(P, "..", "lib");
+  Paths.push_back(std::string(P.str()));
+  llvm::sys::path::append(P, getTripleString());
   Paths.push_back(std::string(P.str()));
 
   return Paths;

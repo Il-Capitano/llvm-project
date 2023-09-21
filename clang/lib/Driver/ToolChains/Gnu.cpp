@@ -563,6 +563,13 @@ void tools::gnutools::Linker::ConstructJob(Compilation &C, const JobAction &JA,
       if (OnlyLibstdcxxStatic)
         CmdArgs.push_back("-Bstatic");
       ToolChain.AddCXXStdlibLibArgs(Args, CmdArgs);
+      // Prefer the libc++ installation adjacent to the compiler installation.
+      if (ToolChain.GetCXXStdlibType(Args) == ToolChain::CST_Libcxx) {
+        for (const auto &Path : ToolChain.getStdlibPaths()) {
+          CmdArgs.push_back("-rpath");
+          CmdArgs.push_back(Args.MakeArgString(Path));
+        }
+      }
       if (OnlyLibstdcxxStatic)
         CmdArgs.push_back("-Bdynamic");
     }
