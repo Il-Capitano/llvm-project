@@ -772,7 +772,13 @@ std::optional<std::string> ToolChain::getRuntimePath() const {
 std::optional<std::string> ToolChain::getStdlibPath() const {
   SmallString<128> P(D.Dir);
   llvm::sys::path::append(P, "..", "lib");
-  return getTargetSubDirPath(P);
+  if (auto TargetPath = getTargetSubDirPath(P))
+    return *TargetPath;
+
+  if (getVFS().exists(P))
+    return std::string(P);
+
+  return {};
 }
 
 ToolChain::path_list ToolChain::getArchSpecificLibPaths() const {

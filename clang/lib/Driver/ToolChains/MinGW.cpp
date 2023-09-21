@@ -745,6 +745,16 @@ void toolchains::MinGW::AddClangCXXStdlibIncludeArgs(
 
   switch (GetCXXStdlibType(DriverArgs)) {
   case ToolChain::CST_Libcxx: {
+    // If there exists an installation of libc++ alongside the compiler,
+    // then only add that
+    llvm::SmallString<128> InstallBin =
+        llvm::StringRef(getDriver().getInstalledDir()); // <install>/bin
+    llvm::sys::path::append(InstallBin, "..", "include", "c++", "v1");
+    if (getVFS().exists(InstallBin)) {
+      addSystemInclude(DriverArgs, CC1Args, InstallBin);
+      return;
+    }
+
     std::string TargetDir = (Base + "include" + Slash + getTripleString() +
                              Slash + "c++" + Slash + "v1")
                                 .str();
